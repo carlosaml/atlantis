@@ -195,7 +195,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 				},
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 			},
 			RunnerInvokeMatch: []*EqMatcher{
@@ -224,7 +224,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 				{
 					Command:     command.Plan,
@@ -259,7 +259,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 				{
 					Command:     command.Plan,
@@ -309,7 +309,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 				},
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 				{
 					Command: command.Plan,
@@ -375,7 +375,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 				},
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 				{
 					Command: command.Plan,
@@ -410,7 +410,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 				{
 					Command: command.Plan,
@@ -441,7 +441,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("shabang"),
+					Error:   errors.New("Shabang!"),
 				},
 				{
 					Command: command.Plan,
@@ -516,14 +516,38 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 	RegisterMockTestingT(t)
 
 	cases := []struct {
-		Description            string
-		ProjectContexts        []command.ProjectContext
-		ProjectResults         []command.ProjectResult
-		PrevPlanStored         bool // stores a previous "No changes" plan in the backend
-		DoNotUpdateApply       bool // certain circumtances we want to skip the call to update apply
-		ExpVCSApplyStatusTotal int
-		ExpVCSApplyStatusSucc  int
+		Description                                string
+		ProjectContexts                            []command.ProjectContext
+		ProjectResults                             []command.ProjectResult
+		PrevPlanStored                             bool // stores a previous "No changes" plan in the backend
+		DoNotUpdateApply                           bool // certain circumstances we want to skip the call to update apply
+		ExpVCSApplyStatusTotal                     int
+		ExpVCSApplyStatusSucc                      int
+		SetAtlantisApplyCheckSuccessfulIfNoChanges bool
 	}{
+		{
+			Description: "When planning without the flag, don't set the atlantis/apply VCS status",
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
+		},
+		{
+			Description: "When planning with the flag, set the atlantis/apply VCS status to 0/0",
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
+			ExpVCSApplyStatusTotal:                     0,
+			ExpVCSApplyStatusSucc:                      0,
+		},
+		{
+			Description:    "When planning with the previous plan that results in No Changes and without the flag, don't set the atlantis/apply VCS status",
+			PrevPlanStored: true,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
+			DoNotUpdateApply: true,
+		},
+		{
+			Description:    "When planning with the previous plan that results in No Changes and setting the flag, set the atlantis/apply VCS status to 1/1",
+			PrevPlanStored: true,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
+			ExpVCSApplyStatusTotal:                     1,
+			ExpVCSApplyStatusSucc:                      1,
+		},
 		{
 			Description: "When planning with changes, do not change the apply status",
 			ProjectContexts: []command.ProjectContext{
@@ -544,7 +568,7 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 			DoNotUpdateApply: true,
 		},
 		{
-			Description: "When planning with no changes, set the 1/1 apply status",
+			Description: "When planning with no changes with the flag, set the 1/1 apply status",
 			ProjectContexts: []command.ProjectContext{
 				{
 					CommandName: command.Plan,
@@ -560,8 +584,32 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 					},
 				},
 			},
-			ExpVCSApplyStatusTotal: 1,
-			ExpVCSApplyStatusSucc:  1,
+			DoNotUpdateApply: false,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
+			ExpVCSApplyStatusTotal:                     1,
+			ExpVCSApplyStatusSucc:                      1,
+		},
+		{
+			Description: "When planning with no changes without the flag, set the 0/0 apply status",
+			ProjectContexts: []command.ProjectContext{
+				{
+					CommandName: command.Plan,
+					RepoRelDir:  "mydir",
+				},
+			},
+			ProjectResults: []command.ProjectResult{
+				{
+					RepoRelDir: "mydir",
+					Command:    command.Plan,
+					PlanSuccess: &models.PlanSuccess{
+						TerraformOutput: "No changes. Infrastructure is up-to-date.",
+					},
+				},
+			},
+			DoNotUpdateApply: true,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
+			ExpVCSApplyStatusTotal:                     0,
+			ExpVCSApplyStatusSucc:                      0,
 		},
 		{
 			Description: "When planning with no changes and previous plan with no changes do not set the apply status",
@@ -600,6 +648,7 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 					},
 				},
 			},
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
 			PrevPlanStored:         true,
 			ExpVCSApplyStatusTotal: 2,
 			ExpVCSApplyStatusSucc:  2,
@@ -689,6 +738,7 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 					},
 				},
 			},
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
 			PrevPlanStored:         true,
 			ExpVCSApplyStatusTotal: 2,
 			ExpVCSApplyStatusSucc:  2,
@@ -703,6 +753,7 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 			Ok(t, err)
 
 			vcsClient := setup(t, func(tc *TestConfig) {
+				tc.SetAtlantisApplyCheckSuccessfulIfNoChanges = c.SetAtlantisApplyCheckSuccessfulIfNoChanges
 				tc.backend = db
 			})
 
@@ -710,7 +761,6 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 			modelPull := models.PullRequest{BaseRepo: testdata.GithubRepo, State: models.OpenPullState, Num: testdata.Pull.Num}
 
 			cmd := &events.CommentCommand{Name: command.Plan}
-
 			ctx := &command.Context{
 				User:     testdata.User,
 				Log:      logging.NewNoopLogger(t),
@@ -719,7 +769,6 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 				HeadRepo: testdata.GithubRepo,
 				Trigger:  command.CommentTrigger,
 			}
-
 			if c.PrevPlanStored {
 				_, err = db.UpdatePullWithResults(modelPull, []command.ProjectResult{
 					{
