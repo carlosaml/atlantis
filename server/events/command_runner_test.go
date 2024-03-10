@@ -95,9 +95,8 @@ func setup(t *testing.T, options ...func(testConfig *TestConfig)) *vcsmocks.Mock
 		StatusName:            "atlantis-test",
 		discardApprovalOnPlan: false,
 		backend:               defaultBoltDB,
-		SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
-		//SetAtlantisApplyCheckSuccessfulIfNoChanges: true, // TODO: which one to keep?
-		DisableUnlockLabel: "do-not-unlock",
+		SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
+		DisableUnlockLabel:                         "do-not-unlock",
 	}
 
 	for _, op := range options {
