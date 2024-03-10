@@ -195,7 +195,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 				},
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 			},
 			RunnerInvokeMatch: []*EqMatcher{
@@ -224,7 +224,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 				{
 					Command:     command.Plan,
@@ -259,7 +259,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 				{
 					Command:     command.Plan,
@@ -309,7 +309,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 				},
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 				{
 					Command: command.Plan,
@@ -375,7 +375,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 				},
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 				{
 					Command: command.Plan,
@@ -410,7 +410,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 				{
 					Command: command.Plan,
@@ -441,7 +441,7 @@ func TestPlanCommandRunner_ExecutionOrder(t *testing.T) {
 			ProjectResults: []command.ProjectResult{
 				{
 					Command: command.Plan,
-					Error:   errors.New("Shabang!"),
+					Error:   errors.New("shabang"),
 				},
 				{
 					Command: command.Plan,
@@ -761,6 +761,7 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 			modelPull := models.PullRequest{BaseRepo: testdata.GithubRepo, State: models.OpenPullState, Num: testdata.Pull.Num}
 
 			cmd := &events.CommentCommand{Name: command.Plan}
+
 			ctx := &command.Context{
 				User:     testdata.User,
 				Log:      logging.NewNoopLogger(t),
@@ -769,6 +770,7 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 				HeadRepo: testdata.GithubRepo,
 				Trigger:  command.CommentTrigger,
 			}
+
 			if c.PrevPlanStored {
 				_, err = db.UpdatePullWithResults(modelPull, []command.ProjectResult{
 					{

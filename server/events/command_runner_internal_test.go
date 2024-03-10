@@ -20,7 +20,7 @@ func TestApplyUpdateCommitStatus(t *testing.T) {
 	}{
 		"apply, one pending": {
 			cmd: command.Apply,
-			SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
 			pullStatus: models.PullStatus{
 				Projects: []models.ProjectStatus{
 					{
@@ -37,7 +37,7 @@ func TestApplyUpdateCommitStatus(t *testing.T) {
 		},
 		"apply, all successful": {
 			cmd: command.Apply,
-			SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
 			pullStatus: models.PullStatus{
 				Projects: []models.ProjectStatus{
 					{
@@ -54,7 +54,7 @@ func TestApplyUpdateCommitStatus(t *testing.T) {
 		},
 		"apply, one errored, one pending": {
 			cmd: command.Apply,
-			SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
 			pullStatus: models.PullStatus{
 				Projects: []models.ProjectStatus{
 					{
