@@ -527,7 +527,8 @@ func TestPlanCommandRunner_AtlantisApplyStatus(t *testing.T) {
 	}{
 		{
 			Description: "When planning without the flag, don't set the atlantis/apply VCS status",
-			SetAtlantisApplyCheckSuccessfulIfNoChanges: true,
+			SetAtlantisApplyCheckSuccessfulIfNoChanges: false,
+			DoNotUpdateApply: true,
 		},
 		{
 			Description: "When planning with the flag, set the atlantis/apply VCS status to 0/0",
